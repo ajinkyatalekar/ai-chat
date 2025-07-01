@@ -18,7 +18,11 @@ export async function POST(req: NextRequest) {
     model
   );
 
-  return NextResponse.json({ id: result.lastID }, { status: 201 });
+  const id = result.lastID;
+
+  const newChat = await db.get('SELECT * FROM chats WHERE id = ?', id);
+
+  return NextResponse.json(newChat, { status: 201 });
 }
 
 export async function DELETE(req: NextRequest) {

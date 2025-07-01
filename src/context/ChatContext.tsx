@@ -8,13 +8,7 @@ import React, {
   ReactNode,
 } from "react";
 
-export interface Chat {
-  id: number;
-  title: string | null;
-  default_model: string;
-  created_at: string;
-  updated_at: string;
-}
+import { Chat } from "@/app/types/chat";
 
 interface ChatContextType {
   chats: Chat[];
@@ -57,19 +51,27 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
   };
 
   const createChat = async (model: string) => {
-    await fetch('/api/db/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model })
+    const response = await fetch("/api/db/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ model }),
     });
+    if (!response.ok) {
+      throw new Error("Failed to create chat");
+    }
+
     fetchChats();
+
+    const newChat = await response.json();
+    setCurrentChat(newChat);
+    console.log(newChat);
   };
 
   const deleteChat = async (id: number) => {
-    await fetch('/api/db/chat', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id })
+    await fetch("/api/db/chat", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
     });
     fetchChats();
   };

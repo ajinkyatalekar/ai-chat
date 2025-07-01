@@ -5,8 +5,12 @@ import ChatSidebar from "@/components/chat-sidebar";
 export default function Home() {
 
   return (
-    <div>
+    <div className="flex h-screen">
       <ChatSidebar />
+      <main className="flex-1 overflow-auto">
+        <div>
+        </div>
+      </main>
     </div>
   )
 
