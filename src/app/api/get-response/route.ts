@@ -10,7 +10,7 @@ export async function POST(req: Request) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "openai/gpt-4o",
+      model: "deepseek/deepseek-chat-v3-0324:free",
       messages: [
         {
           role: "user",
