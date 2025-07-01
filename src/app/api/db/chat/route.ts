@@ -10,12 +10,9 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const db = await getDB();
-  const body = await req.json();
-  const { model } = body;
 
   const result = await db.run(
-    'INSERT INTO chats (default_model) VALUES (?)',
-    model
+    'INSERT INTO chats DEFAULT VALUES'
   );
 
   const id = result.lastID;
