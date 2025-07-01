@@ -14,7 +14,6 @@ export function getDB() {
         CREATE TABLE IF NOT EXISTS chats (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           title TEXT,
-          default_model TEXT NOT NULL,
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );
