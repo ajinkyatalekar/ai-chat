@@ -22,7 +22,7 @@ interface ChatContextType {
 
   messages: Message[];
   fetchMessages: () => Promise<void>;
-  generateResponse: ({prompt}: {prompt: string}) => Promise<void>;
+  generateResponse: ({prompt, model}: {prompt: string, model: string}) => Promise<void>;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -110,7 +110,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     setMessages(data);
   };
 
-  const generateResponse = async ({prompt}: {prompt: string}) => {
+  const generateResponse = async ({prompt, model}: {prompt: string, model: string}) => {
     const response_user = await fetch("/api/db/message", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -126,7 +126,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     const response = await fetch("api/get-response", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages: messages }),
+      body: JSON.stringify({ messages: messages, model: model }),
     });
     const data = await response.json();
     console.log(data);
@@ -143,41 +143,6 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
 
     fetchMessages();
   }
-
-
-  const sendMessage = async ({ role, content }: { role: string; content: string }) => {
-    const response_user = await fetch("/api/db/message", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chat_id: currentChat?.id, role, content }),
-    });
-    if (!response_user.ok) {
-      throw new Error("Failed to send message");
-    }
-        
-    fetchMessages();
-
-    const resp = await fetch("api/get-response", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages: messages }),
-    });
-
-    const data = await resp.json();
-
-    console.log(data);
-
-    const response_assistant = await fetch("/api/db/message", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chat_id: currentChat?.id, role: "assistant", content: data.choices[0].message.content }),
-    });
-    if (!response_assistant.ok) {
-      throw new Error("Failed to send message");
-    }
-
-    fetchMessages();
-  };
 
   const value: ChatContextType = {
     chats,
