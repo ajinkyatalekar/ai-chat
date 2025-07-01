@@ -5,16 +5,17 @@ import { useState, FC } from "react";
 import { useChat } from "@/context/ChatContext";
 import MessageList from "./MessageList";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { AI_CONFIG } from "@/lib/config";
 
 export default function Chatbox() {
   const [prompt, setPrompt] = useState("");
-  const { messages, generateResponse } = useChat();
+  const { messages, generateResponse, loadingResponse } = useChat();
 
-  const [model, setModel] = useState("gpt-4o");
+  const [model, setModel] = useState<string>(AI_CONFIG.DEFAULT_MODEL);
 
   return (
     <div className="min-h-screen bg-[#1a1a1a] flex flex-col">
-      <MessageList messages={messages} />
+      <MessageList loadingResponse={loadingResponse} />
 
       <div className="flex-1" />
 
@@ -33,9 +34,9 @@ export default function Chatbox() {
               <SelectValue placeholder="Select a model" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="gpt-4o">GPT-4o</SelectItem>
-              <SelectItem value="gpt-4o-mini">claude-4-sonnet</SelectItem>
-              <SelectItem value="deepseek-chat">deepseek/deepseek-chat-v3-0324:free</SelectItem>
+              <SelectItem value="openai/gpt-4o">GPT-4o</SelectItem>
+              <SelectItem value="anthropic/claude-sonnet-4">claude-4-sonnet</SelectItem>
+              <SelectItem value="deepseek/deepseek-chat-v3-0324:free">deepseek-chat</SelectItem>
             </SelectContent>
           </Select>
           <Button
@@ -46,7 +47,7 @@ export default function Chatbox() {
               setPrompt("");
             }}
             className="hover:cursor-pointer m-0"
-            disabled={!prompt}
+            disabled={!prompt || loadingResponse}
           >
             <SendIcon className="w-4 h-4" />
           </Button>

@@ -5,8 +5,9 @@ export async function GET(req: NextRequest) {
   const db = await getDB();
   const { searchParams } = new URL(req.url);
   const chatId = searchParams.get("chat_id");
+  const start_message_id = searchParams.get("start_message_id");
 
-  const messages = await db.all("SELECT * FROM messages WHERE chat_id = ?", chatId);
+  const messages = await db.all("SELECT * FROM messages WHERE chat_id = ? AND id > ?", [chatId, start_message_id]);
   return NextResponse.json(messages, { status: 200 });
 }
 

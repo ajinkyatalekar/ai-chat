@@ -24,10 +24,23 @@ export function getDB() {
           chat_id INTEGER NOT NULL,
           role TEXT NOT NULL CHECK (role IN ('user', 'assistant', 'system')),
           content TEXT NOT NULL,
+          tokens INTEGER GENERATED ALWAYS AS ((LENGTH(content) + 12) / 4) STORED,
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           FOREIGN KEY(chat_id) REFERENCES chats(id) ON DELETE CASCADE
         );
       `);
+      await db.exec(`
+        CREATE TABLE IF NOT EXISTS summaries (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          chat_id INTEGER NOT NULL,
+          end_message_id INTEGER NOT NULL,
+          summary TEXT NOT NULL,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY(chat_id) REFERENCES chats(id) ON DELETE CASCADE,
+          FOREIGN KEY(end_message_id) REFERENCES messages(id)
+        );
+      `);
+
       return db;
     });
   }
