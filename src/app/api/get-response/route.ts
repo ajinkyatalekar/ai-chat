@@ -1,7 +1,7 @@
 "use server";
 
 export async function POST(req: Request) {
-  const { prompt } = await req.json();
+  const { messages, model } = await req.json();
 
   const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
@@ -10,13 +10,8 @@ export async function POST(req: Request) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "openai/gpt-4o",
-      messages: [
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
+      model: model,
+      messages: messages,
     }),
   });
 
