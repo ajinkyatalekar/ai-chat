@@ -1,7 +1,7 @@
 import { Textarea } from "./ui/textarea";
 import { SendIcon } from "lucide-react";
 import { Button } from "./ui/button";
-import { useState, FC } from "react";
+import { useState } from "react";
 import { useChat } from "@/context/ChatContext";
 import MessageList from "./MessageList";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
@@ -9,7 +9,7 @@ import { AI_CONFIG } from "@/lib/config";
 
 export default function Chatbox() {
   const [prompt, setPrompt] = useState("");
-  const { messages, generateResponse, loadingResponse } = useChat();
+  const { generateResponse, loadingResponse } = useChat();
 
   const [model, setModel] = useState<string>(AI_CONFIG.DEFAULT_MODEL);
 

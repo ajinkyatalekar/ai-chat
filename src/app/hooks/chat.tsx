@@ -1,4 +1,5 @@
 import { AI_CONFIG } from "@/lib/config";
+import { Message } from "../types/message";
 export const getMessagesForResponse = async (chat_id: number | undefined) => {
   if (!chat_id) {
     throw new Error("Chat ID is required");
@@ -6,7 +7,7 @@ export const getMessagesForResponse = async (chat_id: number | undefined) => {
 
   const tokens = await getTotalTokens(chat_id);
 
-  if (tokens > AI_CONFIG.CONTEXT_WINDOW) {
+  if (tokens > AI_CONFIG.SUMMARIZATION_THRESHOLD) {
     await summarize(chat_id);
   }
 
@@ -115,7 +116,7 @@ export const summarize = async (chat_id: number | undefined) => {
   const summary = summaryData.choices[0].message.content;
 
   const end_message_id = Math.max(
-    ...messagesToSummarize.map((msg: any) => msg.id)
+    ...messagesToSummarize.map((msg: Message) => msg.id)
   );
 
   const storeSummaryResponse = await fetch("/api/db/summary", {

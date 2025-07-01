@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDB } from '@/db/db';
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   const db = await getDB();
   const rows = await db.all('SELECT * FROM chats ORDER BY created_at DESC');
 
   return NextResponse.json(rows, { status: 200 });
 }
 
-export async function POST(req: NextRequest) {
+export async function POST() {
   const db = await getDB();
 
   const result = await db.run(
@@ -30,7 +30,7 @@ export async function DELETE(req: NextRequest) {
   try {
     await db.run('DELETE FROM chats WHERE id = ?', id);
     return NextResponse.json({ message: 'Chat deleted successfully' }, { status: 200 });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to delete chat' }, { status: 500 });
   }
 }

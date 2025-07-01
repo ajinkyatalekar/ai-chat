@@ -16,7 +16,7 @@ export default function ChatSidebar() {
         <Button
           className="justify-start gap-2 bg-neutral-800 hover:bg-neutral-700 cursor-pointer"
           variant="secondary"
-          onClick={() => createChat("gpt-4o")}
+          onClick={() => createChat()}
         >
           <Plus /> New chat
         </Button>
