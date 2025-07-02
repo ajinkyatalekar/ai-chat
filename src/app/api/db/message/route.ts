@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDB } from "@/db/db";
 
 export async function GET(req: NextRequest) {
-  const db = await getDB();
   const { searchParams } = new URL(req.url);
   const chatId = searchParams.get("chat_id");
   const start_message_id = searchParams.get("start_message_id");
@@ -24,7 +23,7 @@ export async function POST(req: NextRequest) {
   return NextResponse.json(message, { status: 201 });
 }
 
-export async function get_messages(chat_id: number, start_message_id: number | undefined) {
+async function get_messages(chat_id: number, start_message_id: number | undefined) {
   if (!start_message_id) {
     start_message_id = 0;
   }
