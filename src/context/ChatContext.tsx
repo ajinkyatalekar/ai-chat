@@ -22,11 +22,9 @@ interface ChatContextType {
   messages: Message[];
   fetchMessages: () => Promise<void>;
   generateResponse: ({
-    chat_id,
     prompt,
     model,
   }: {
-    chat_id: number;
     prompt: string;
     model: string;
   }) => Promise<void>;
@@ -173,8 +171,6 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     if (!response.ok) {
       throw new Error("Failed to generate response");
     }
-    const data = await response.json();
-
     await fetchMessages(chatToUse?.id);
 
     setLoadingResponse(false);
