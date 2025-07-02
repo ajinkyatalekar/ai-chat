@@ -10,7 +10,6 @@ import React, {
 
 import { Chat } from "@/app/types/chat";
 import { Message } from "@/app/types/message";
-import { getMessagesForResponse, getTotalTokens } from "@/app/hooks/chat";
 
 interface ChatContextType {
   chats: Chat[];
@@ -23,9 +22,11 @@ interface ChatContextType {
   messages: Message[];
   fetchMessages: () => Promise<void>;
   generateResponse: ({
+    chat_id,
     prompt,
     model,
   }: {
+    chat_id: number;
     prompt: string;
     model: string;
   }) => Promise<void>;
@@ -77,7 +78,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
       throw new Error("Failed to create chat");
     }
 
-    fetchChats();
+    await fetchChats();
 
     const newChat = await response.json();
     setCurrentChat(newChat);
@@ -106,14 +107,19 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     setChat(chat);
   };
 
-  const fetchMessages = async () => {
-    if (!currentChat) {
+  const fetchMessages = async (chat_id: number | null = null) => {
+    console.log("fetchMessages", currentChat);
+    if (!chat_id) {
+      chat_id = currentChat?.id || 0;
+    }
+
+    if (!chat_id) {
       setMessages([]);
       return;
     }
 
     const response = await fetch(
-      `/api/db/message?chat_id=${currentChat.id}&start_message_id=${0}`
+      `/api/db/message?chat_id=${chat_id}&start_message_id=${0}`
     );
     if (!response.ok) {
       throw new Error("Failed to fetch messages");
@@ -131,8 +137,9 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
   }) => {
     setLoadingResponse(true);
 
-    let chatToUse = currentChat;
-    if (!currentChat) {
+    let chatToUse = currentChat;    
+
+    if (!chatToUse) {
       const response = await fetch("/api/db/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -145,59 +152,30 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
       setCurrentChat(newChat);
       chatToUse = newChat;
 
-      fetchChats();
+      await fetchChats();
     }
-
-    if (!chatToUse) {
-      throw new Error("Failed to create or get chat");
-    }
-
-    const response_user = await fetch("/api/db/message", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id: chatToUse.id,
-        role: "user",
-        content: prompt,
-      }),
-    });
-    if (!response_user.ok) {
-      throw new Error("Failed to send message");
-    }
-
-    fetchMessages();
-
-    const messages = await getMessagesForResponse(chatToUse.id);
-    const response = await fetch("api/get-response", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages: messages, model: model }),
-    });
-    const data = await response.json();
-    console.log(data);
-
-    const response_assistant = await fetch("/api/db/message", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id: chatToUse.id,
-        role: "assistant",
-        content: data.choices[0].message.content,
-      }),
-    });
-
-    if (!response_assistant.ok) {
-      throw new Error("Failed to send message");
-    }
-
-    const total_tokens = await getTotalTokens(chatToUse.id);
-    console.log("Tokens used: " + total_tokens);
 
     setMessages([...messages, {
-      id: data.choices[0].message.id,
-      role: "assistant",
-      content: data.choices[0].message.content,
+      id: -1,
+      chat_id: chatToUse?.id || 0,
+      role: "user",
+      content: prompt,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     }]);
+
+    const response = await fetch("/api/generate-response", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: chatToUse?.id, prompt, model }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to generate response");
+    }
+    const data = await response.json();
+
+    await fetchMessages(chatToUse?.id);
 
     setLoadingResponse(false);
   };
