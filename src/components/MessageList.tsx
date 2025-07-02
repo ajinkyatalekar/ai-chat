@@ -11,9 +11,9 @@ const MessageList: React.FC<MessageListProps> = ({loadingResponse }) => {
 
   return (
   <div className="p-4">
-    {messages.map((message) => (
+    {messages.map((message, idx) => (
       <div
-        key={message.id}
+        key={idx}
         className={
           message.role === "user"
             ? "text-right text-blue-300 mb-2"
